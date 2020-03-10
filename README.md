@@ -32,7 +32,7 @@ npm install
 
 ### Configuración
 En el archivo src/components/weather/data.js
-- Agregar el API KEY generado en [openweather](https://openweathermap.org/) en la variable data con el key API_KEY
+- Agregar el API KEY generado en [openweather](https://openweathermap.org/) en la variable data con el key API_KEY, este valor es un String por lo cual va en comillas
 - Sumar ciudades en la variable data con el key "cities" (opcional, hay ciudades precargadas)
 
 ### Correr la app en modo development
