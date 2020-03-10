@@ -1,0 +1,40 @@
+.day__items {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.day__item .dayname {
+    text-align: center;
+}
+
+.day__item .hour__items {
+    border: solid 1px #f1f1f1;
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    margin: 0 auto;
+    margin-bottom: 1rem;
+    padding: 0;
+    width: max-content;
+}
+
+.hour__item {
+    margin: 0;
+    padding: 1rem;
+}
+
+.hour__item:not(:last-child) {
+    border-right: solid 1px #f1f1f1;   
+}
+
+.hour__item .temperature,
+.hour__item .time {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.hour__item .temperature {
+    margin-bottom: 0.5rem;
+}

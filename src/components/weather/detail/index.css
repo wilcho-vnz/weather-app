@@ -1,0 +1,30 @@
+.detail {
+    border: solid 1px white;
+    border-radius: 5px;
+    display: block;
+    padding: 10px;
+    position: relative;
+    margin: 0 auto;
+    max-width: 300px;
+}
+
+.detail .description,
+.detail .temp,
+.detail .location {
+    /*color: white;*/
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.detail .description {
+    font-size: 2rem;
+}
+
+.detail .temp {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.detail .location {
+    font-size: 2.5rem;
+}
