@@ -21,7 +21,7 @@ class Weather extends React.Component {
         this.setState({
             currentCity: value
         }, () => {
-            this.fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
+            this.loadCityData()
             .then(data => this.showDetail(data))
             .then(data => this.showWeekData(data))
         })
@@ -29,6 +29,10 @@ class Weather extends React.Component {
 
     // Calcular temperatura
     calculateTemp = temp => ( this.state.fahrenheit ) ? Math.round(((parseFloat(temp)-273.15)*1.8)+32) : Math.round(parseFloat(temp)-273.15)
+
+    loadCityData = () => {
+        return this.fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
+    }
 
     // Mostrar temperatura actual
     showDetail = (data) => {
@@ -98,7 +102,7 @@ class Weather extends React.Component {
     }
 
     componentDidMount() {
-        this.fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
+        this.loadCityData()
         .then(data => this.showDetail(data))
         .then(data => this.showWeekData(data))
     }
