@@ -34,6 +34,10 @@ class Weather extends React.Component {
         return this.fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
     }
 
+    loadWeekData = () => {
+        return this.fetchData(`http://api.openweathermap.org/data/2.5/forecast?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
+    }
+
     // Mostrar temperatura actual
     showDetail = (data) => {
         return new Promise((resolve, reject) => {
@@ -45,7 +49,7 @@ class Weather extends React.Component {
                 }
             })
 
-            resolve(this.fetchData(`http://api.openweathermap.org/data/2.5/forecast?q=${this.state.currentCity}&appid=${this.state.API_KEY}`))
+            resolve(this.loadWeekData())
         })
     }
     
