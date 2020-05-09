@@ -1,126 +1,137 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import moment from 'moment'
 
 import { DayList, Detail, Error, Select, data } from '../index'
 import './index.css'
 
-class Weather extends React.Component {
-    state = {
-        currentCity: data.cities[0],
-        currrentDay: moment().date(),
-        errorMessage: '',
-        errorShow: false,
-        weekdays: null,
-        celcius: true,
-        fahrenheit: false,
-        detail: null,
-        API_KEY: data.API_KEY
-    }
+const calculateFahrenheit = value =>
+  Math.round((parseFloat(value) - 273.15) * 1.8 + 32)
 
-    handleChange = value => {
-        this.setState({
-            currentCity: value
-        }, () => {
-            this.loadCityData()
-            .then(data => this.showDetail(data))
-            .then(data => this.showWeekData(data))
-        })
-    }
+const calculateCelcius = value => Math.round(parseFloat(value) - 273.15)
 
-    // Calcular temperatura
-    calculateTemp = temp => ( this.state.fahrenheit ) ? Math.round(((parseFloat(temp)-273.15)*1.8)+32) : Math.round(parseFloat(temp)-273.15)
+const fetchData = url => {
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => data)
+}
 
-    loadCityData = () => {
-        return this.fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
-    }
+const Weather = () => {
+  const [currentCity, setCurrentCity] = useState(data.cities[0])
+  const [currrentDay, setCurrrentDay] = useState(moment().date())
+  const [errorMessage, setErrorMessage] = useState('')
+  const [errorShow, setErrorShow] = useState(false)
+  const [weekdays, setWeekdays] = useState([])
+  const [celcius, setCelcius] = useState(true)
+  const [detail, setDetail] = useState(null)
+  const [apiKey, setApiKey] = useState(data.API_KEY)
 
-    loadWeekData = () => {
-        return this.fetchData(`http://api.openweathermap.org/data/2.5/forecast?q=${this.state.currentCity}&appid=${this.state.API_KEY}`)
-    }
+  useEffect(() => {
+    loadCityData()
+      .then(data => showDetail(data))
+      .then(data => showWeekData(data))
+  }, [])
 
-    // Mostrar temperatura actual
-    showDetail = (data) => {
-        return new Promise((resolve, reject) => {
-            this.setState({
-                detail: {
-                    description: data.weather[0].description,
-                    temp: this.calculateTemp(data.main.temp),
-                    location: data.name
-                }
-            })
+  const handleChange = value => {
+    setCurrentCity(value)
+    loadCityData()
+      .then(data => showDetail(data))
+      .then(data => showWeekData(data))
+  }
 
-            resolve(this.loadWeekData())
-        })
-    }
-    
-    // Mostrar temperatura semana
-    showWeekData = data => {
-        let currentDay = null
-        let loopDateTime = null
-        const weekdays = []
+  // Calcular temperatura
+  const calculateTemp = temp =>
+    celcius ? calculateCelcius(temp) : calculateFahrenheit(temp)
 
-        // remover dia actual del array original
-        const filteredArray = data.list.filter( item => moment(item.dt_txt).date() !== moment().date() )
+  const loadCityData = () => {
+    return fetchData(
+      `http://api.openweathermap.org/data/2.5/weather?q=${currentCity}&appid=${apiKey}`
+    )
+  }
 
-        filteredArray.forEach(item => {
+  const loadWeekData = () => {
+    return fetchData(
+      `http://api.openweathermap.org/data/2.5/forecast?q=${currentCity}&appid=${apiKey}`
+    )
+  }
 
-            loopDateTime = item.dt_txt
-            if( !currentDay ) currentDay = loopDateTime
+  // Mostrar temperatura actual
+  const showDetail = data => {
+    return new Promise((resolve, reject) => {
+      setDetail({
+        description: data.weather[0].description,
+        temp: calculateTemp(data.main.temp),
+        location: data.name,
+      })
 
-            // temperatura
-            const temp = this.calculateTemp(item.main.temp)
+      resolve(loadWeekData())
+    })
+  }
 
-            // Hora
-            const time = moment(loopDateTime).format("HH:mm")
+  // Mostrar temperatura semana
+  const showWeekData = data => {
+    setWeekdays([])
+    const addedItems = []
+    const { list: dataDays } = data
+    let currentDay = null
 
-            // buscar si el dia ya esta en el array de la semana
-            const result = weekdays.find( item => item.day === moment(loopDateTime).date() )
+    // remover dia actual del array original
+    const dataDaysFiltered = dataDays.filter(item => {
+      const { dt_txt } = item
+      return moment(dt_txt).date() !== moment().date()
+    })
 
-            // Existe el dia
-            if(result !== undefined) result.hours.push({ temp, time })
-            
-            // No existe, crear objeto del dia que con tiene el array de horarios
-            else {
-                const day = {
-                    day: moment(loopDateTime).date(),
-                    dayName: moment(loopDateTime).format('dddd'),
-                    hours: [{
-                        temp,
-                        time
-                    }]
-                }
+    dataDaysFiltered.forEach(item => {
+      const { dt_txt: dateTimeTxt } = item
+      if (!currentDay) currentDay = dateTimeTxt
 
-                weekdays.push(day)
-            }
-        })
+      // temperatura
+      let { temp } = item.main
+      temp = calculateTemp(temp)
 
-        this.setState({
-            weekdays
-        })
-    }
+      // Hora
+      const time = moment(dateTimeTxt).format('HH:mm')
 
-    fetchData(url) {
-        return fetch(url)
-        .then((response) => response.json())
-        .then( data => data)
-    }
+      const isDayAdded = addedItems.find(item => {
+        const { day } = item
+        return day === moment(dateTimeTxt).date()
+      })
 
-    componentDidMount() {
-        this.loadCityData()
-        .then(data => this.showDetail(data))
-        .then(data => this.showWeekData(data))
-    }
+      // Existe el dia
+      if (isDayAdded !== undefined) {
+        const { hours } = isDayAdded
+        const data = [...hours, { temp, time }]
+        isDayAdded.hours = data
+      } else {
+        const day = {
+          day: moment(dateTimeTxt).date(),
+          dayName: moment(dateTimeTxt).format('dddd'),
+          hours: [
+            {
+              temp,
+              time,
+            },
+          ],
+        }
 
-    render() {
-        return (
-            <div className="weather">
-                <Error message={this.state.errorMessage} show={this.state.errorShow} />
-                <Select key={`select-${this.state.currentCity}`} currentCity={this.state.currentCity} onChange={this.handleChange} />
-                <Detail key={`detail-${this.state.currentCity}`} data={this.state.detail} />
-                <DayList key={`daylist-${this.state.currentCity}`} weekdays={this.state.weekdays} />
-            </div>
-        )
-    }
+        addedItems.push(day)
+      }
+    })
+
+    setWeekdays(addedItems)
+  }
+
+  return (
+    <div className="weather">
+      <Error message={errorMessage} show={errorShow} />
+      <Select
+        key={`select-${currentCity}`}
+        currentCity={currentCity}
+        onChange={handleChange}
+      />
+      <Detail key={`detail-${currentCity}`} data={detail} />
+      <DayList key={`daylist-${currentCity}`} weekdays={weekdays} />
+    </div>
+  )
 }
 
 export default Weather
