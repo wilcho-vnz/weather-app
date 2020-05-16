@@ -26,9 +26,14 @@ const Weather = () => {
   const [apiKey, setApiKey] = useState(data.API_KEY)
 
   useEffect(() => {
-    loadCityData()
-      .then(data => showDetail(data))
-      .then(data => showWeekData(data))
+    if (apiKey) {
+      loadCityData()
+        .then(data => showDetail(data))
+        .then(data => showWeekData(data))
+    } else {
+      setErrorMessage('API Key not set')
+      setErrorShow(true)
+    }
   }, [currentCity])
 
   const handleChange = value => {

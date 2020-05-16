@@ -1,5 +1,5 @@
 const data = {
-  API_KEY: '2fdfda916b3096d3a2dc1bde7c2f35b4',
+  API_KEY: null,
   cities: ['London', 'Buenos Aires', 'New York', 'Paris', 'Tokio'],
 }
 
