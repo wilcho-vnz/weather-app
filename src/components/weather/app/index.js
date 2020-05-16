@@ -29,13 +29,10 @@ const Weather = () => {
     loadCityData()
       .then(data => showDetail(data))
       .then(data => showWeekData(data))
-  }, [])
+  }, [currentCity])
 
   const handleChange = value => {
     setCurrentCity(value)
-    loadCityData()
-      .then(data => showDetail(data))
-      .then(data => showWeekData(data))
   }
 
   // Calcular temperatura
